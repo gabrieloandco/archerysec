@@ -1,0 +1,194 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "archerysec.fullname" . }}-webapp
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: webapp
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: webapp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: archerysec-db
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: sqldb
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: sqldb
+  type: ClusterIP
+  ports:
+  - port: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zapscanner
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: zap
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: zap
+  type: ClusterIP
+  ports:
+  - port: 8090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arachniscanner-restapi
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: arachni
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: arachni
+  type: ClusterIP
+  ports:
+  - name: restapi
+    port: 7331
+    targetPort: 7331
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arachniscanner-webgui
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: arachni
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: arachni
+  type: {{ .Values.service_arachni.type }}
+  ports:
+  - port: {{ .Values.service_arachni.port }}
+    targetPort: 9292
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openvasscanner-restapi
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+  type: ClusterIP
+  ports:
+  - port: 9390
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openvasscanner-gsa
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+  type: {{ .Values.service_openvas_gsa.type }}
+  ports:
+  - port: {{ .Values.service_openvas_gsa.port }}
+    targetPort: 9292
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openvasscanner-webgui
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: scanner
+    type: openvas
+  type: {{ .Values.service_openvas_gui.type }}
+  ports:
+  - port: {{ .Values.service_openvas_gui.port }}
+    targetPort: 9292
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog-smtp
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: sidecar
+    type: mail
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: sidecar
+    type: mail
+  type: ClusterIP
+  ports:
+  - port: 1025
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog-http
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: sidecar
+    type: mail
+spec:
+  selector:
+    {{- include "archerysec.appselectorLabels" . | nindent 4 }}
+    app: archerysec
+    tier: sidecar
+    type: mail
+  type: {{ .Values.service_mailhog.type }}
+  ports:
+  - port: {{ .Values.service_mailhog.port }}
+    targetPort: 9292

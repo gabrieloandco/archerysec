@@ -1,0 +1,17 @@
+{{- if .Values.create_volume -}}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.volume_name | default "postgres-pv"}}
+  labels:
+    type: {{ .Values.volume_type | default "local"}}
+spec:
+  capacity:
+    storage: {{ .Values.storage_size | default "200M"}}
+  storageClassName: {{ .Values.storage_class| default "standard"}}
+  accessModes:
+    - "ReadWriteOnce"
+  hostPath:
+    path: "/mnt/postgres-pv"
+{{- end }}

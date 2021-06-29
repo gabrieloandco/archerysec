@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "archerysec.fullname" . }}-webapp
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: webapp
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.webapp_replicaCount  }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "archerysec.appselectorLabels" . | nindent 6 }}
+      app: archerysec
+      tier: webapp
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "archerysec.appselectorLabels" . | nindent 8 }}
+        app: archerysec
+        tier: webapp
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "archerysec.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: "{{ .Chart.Name }}-webapp"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion  }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort:  8000
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8000
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 3
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8000
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 2
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}-webapp
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "archerysec.fullname" . }}-worker
+  labels:
+    {{- include "archerysec.applabels" . | nindent 4 }}
+    app: archerysec
+    tier: worker
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.worker_replicaCount  }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "archerysec.appselectorLabels" . | nindent 6 }}
+      app: archerysec
+      tier: worker
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "archerysec.appselectorLabels" . | nindent 8 }}
+        app: archerysec
+        tier: worker
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "archerysec.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: "{{ .Chart.Name }}-worker"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion  }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}-worker
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sqldb
+data:
+  POSTGRES_DB: "archerysec"
+  POSTGRES_PASSWORD: "archerysec"
+  POSTGRES_USER: "archerysec"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: archerysec-webapp
+data:
+  DB_PASSWORD: "archerysec"
+  DB_USER: "archerysec"
+  DB_NAME: "archerysec"
+  DB_HOST: "archerysec-db"
+  DJANGO_SETTINGS_MODULE: "archerysecurity.settings.development"
+  DJANGO_SECRET_KEY: '${DJANGO_SECRET_KEY:_"SETME"}"'
+  DJANGO_DEBUG: "1"
+  EMAIL_HOST: "mailhog"
+  EMAIL_PORT: "1025"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: archerysec-worker
+data:
+  DB_PASSWORD: "archerysec"
+  DB_USER: "archerysec"
+  DB_NAME: "archerysec"
+  DB_HOST: "archerysec-db"
+  DJANGO_SETTINGS_MODULE: "archerysecurity.settings.development"
+  DJANGO_SECRET_KEY: '${DJANGO_SECRET_KEY:_"SETME"}'
+  DJANGO_DEBUG: "1"
+  EMAIL_HOST: "mailhog"
+  EMAIL_PORT: "1025"
+  ARCHERY_WORKER: "True"

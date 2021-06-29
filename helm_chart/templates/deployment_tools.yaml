@@ -1,0 +1,118 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zapscanner
+  labels:
+    tier: scanner
+    type: zap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        tier: scanner
+        type: zap
+  template:
+    metadata:
+      labels:
+        tier: scanner
+        type: zap
+    spec:
+      containers:
+      - name: zapscanner
+        image: owasp/zap2docker-stable
+        command: ['sh', '-c' ,'zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true -config api.addrs.addr.name=.* -config api.addrs.addr.regex=true']
+        ports:
+          - containerPort: 8090
+        env:
+          - name: ZAP_PORT
+            value: '8090'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arachniscanner
+  labels:
+    tier: scanner
+    type: arachni
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: scanner
+      type: arachni
+  template:
+    metadata:
+      labels:
+        tier: scanner
+        type: arachni
+    spec:
+      containers:
+      - name: arachniscanner
+        image: arachni/arachni
+        ports:
+          - name: webgui
+            containerPort: 9292
+          - name: restapi
+            containerPort: 7331
+        env:
+          - name: ARACHNI-PARAMS
+            value: '"--authentication-username arachni --authentication-password password --verbose --reroute-to-logfile --debug 3"'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openvasscanner
+  labels:
+    tier: scanner
+    type: openvas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: scanner
+      type: openvas
+  template:
+    metadata:
+      labels:
+        tier: scanner
+        type: openvas
+    spec:
+      containers:
+      - name: openvasscanner
+        image: avhost/docker-openvas
+        ports:
+          - name: gsa
+            containerPort: 9392
+          - name:  api
+            containerPort: 9390
+          - name:   webgui
+            containerPort: 443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+  labels:
+    tier: sidecar
+    type: mail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: sidecar
+      type: mail
+  template:
+    metadata:
+      labels:
+        tier: sidecar
+        type: mail
+    spec:
+      containers:
+      - name: mailhog
+        image: mailhog/mailhog
+        ports:
+          - name:  smtp
+            containerPort: 1025
+          - name:  http
+            containerPort: 8025
